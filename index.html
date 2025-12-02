@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="icon" type="image/jpeg" href="favicon.jpg">
 <meta charset="UTF-8" />
-<title>Daily NT Reading</title>
+<title>Bloody Donut</title>
+<link rel="icon" type="image/jpeg" href="favicon.jpg">
+
 <style>
   body {
     margin: 0;
@@ -16,15 +17,67 @@
     align-items: center;
     height: 100vh;
     text-align: center;
+    padding: 20px;
   }
+
   #date {
     font-size: 14px;
     color: #999;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
+
   #chapter {
     font-size: 48px;
     font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  #tomorrow {
+    font-size: 18px;
+    color: #aaa;
+  }
+
+  /* Mobile optimization */
+  @media (max-width: 600px) {
+    #chapter {
+      font-size: 36px;
+    }
+    #tomorrow {
+      font-size: 16px;
+    }
+  }
+
+  /* Test date box */
+  #tester {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #1a1a1a;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+
+  #tester input {
+    background: #000;
+    color: white;
+    border: 1px solid #555;
+    padding: 4px;
+    border-radius: 4px;
+  }
+
+  #tester button {
+    margin-left: 5px;
+    padding: 4px 8px;
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #tester button:hover {
+    background: #333;
   }
 </style>
 </head>
@@ -32,9 +85,17 @@
 
 <div id="date"></div>
 <div id="chapter"></div>
+<div id="tomorrow"></div>
+
+<!-- Test-date box -->
+<div id="tester">
+  Test date:
+  <input type="date" id="testInput">
+  <button onclick="applyTestDate()">Go</button>
+</div>
 
 <script>
-// List of NT books starting at Mark
+// Books from Mark → Revelation
 const books = [
   ["Mark", 16], ["Luke", 24], ["John", 21], ["Acts", 28],
   ["Romans", 16], ["1 Corinthians", 16], ["2 Corinthians", 13],
@@ -46,7 +107,7 @@ const books = [
   ["Revelation", 22]
 ];
 
-// Flatten chapters
+// Flatten to single list like ["Mark 1", "Mark 2", ...]
 let chapters = [];
 books.forEach(b => {
   for (let c = 1; c <= b[1]; c++) {
@@ -54,36 +115,56 @@ books.forEach(b => {
   }
 });
 
-// Starting point (December 1st Chapter)
+// Starting point: Dec 1 → Mark 4
 const startIndex = chapters.indexOf("Mark 4");
 
-// Helper: date difference in days
+// Day difference helper
 function daysBetween(a, b) {
-  const ms = 24*60*60*1000;
-  const da = new Date(a.getFullYear(), a.getMonth(), a.getDate());
-  const db = new Date(b.getFullYear(), b.getMonth(), b.getDate());
-  return Math.round((da - db) / ms);
+  const ms = 86400000;
+  return Math.round((a - b) / ms);
 }
 
-// Get anchor
-function getAnchor() {
-  const today = new Date();
-  const dec1 = new Date(today.getFullYear(), 11, 1);
-  return today < dec1 ? new Date(today.getFullYear()-1, 11, 1) : dec1;
+// Finds the Dec 1 anchor for the current or test year
+function getAnchor(date) {
+  const dec1 = new Date(date.getFullYear(), 11, 1);
+  return date < dec1 ? new Date(date.getFullYear() - 1, 11, 1) : dec1;
 }
 
-function getTodayChapter() {
-  const today = new Date();
-  const anchor = getAnchor();
-  const diff = daysBetween(today, anchor);
-  const index = (startIndex + diff) % chapters.length;
-  return chapters[(index + chapters.length) % chapters.length];
+// Get chapter for any date
+function getChapterFor(date) {
+  const anchor = getAnchor(date);
+  const diff = daysBetween(
+    new Date(date.getFullYear(), date.getMonth(), date.getDate()),
+    anchor
+  );
+  const idx = (startIndex + diff) % chapters.length;
+  return chapters[(idx + chapters.length) % chapters.length];
 }
 
-// Display
-const today = new Date();
-document.getElementById("date").textContent = today.toDateString();
-document.getElementById("chapter").textContent = getTodayChapter();
+// MAIN DISPLAY
+function display(date) {
+  document.getElementById("date").textContent = date.toDateString();
+
+  const todayChapter = getChapterFor(date);
+  document.getElementById("chapter").textContent = todayChapter;
+
+  // Tomorrow
+  const tomorrow = new Date(date);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowChapter = getChapterFor(tomorrow);
+  document.getElementById("tomorrow").textContent =
+    "Tomorrow: " + tomorrowChapter;
+}
+
+// Test date handler
+function applyTestDate() {
+  const val = document.getElementById("testInput").value;
+  if (!val) return;
+  display(new Date(val));
+}
+
+// Default: show today
+display(new Date());
 </script>
 
 </body>
