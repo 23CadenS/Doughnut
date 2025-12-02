@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Daily NT Reading</title>
+<style>
+  body {
+    margin: 0;
+    background: #0d0d0d;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+  }
+  #date {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 20px;
+  }
+  #chapter {
+    font-size: 48px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div id="date"></div>
+<div id="chapter"></div>
+
+<script>
+// List of NT books starting at Mark
+const books = [
+  ["Mark", 16], ["Luke", 24], ["John", 21], ["Acts", 28],
+  ["Romans", 16], ["1 Corinthians", 16], ["2 Corinthians", 13],
+  ["Galatians", 6], ["Ephesians", 6], ["Philippians", 4],
+  ["Colossians", 4], ["1 Thessalonians", 5], ["2 Thessalonians", 3],
+  ["1 Timothy", 6], ["2 Timothy", 4], ["Titus", 3], ["Philemon", 1],
+  ["Hebrews", 13], ["James", 5], ["1 Peter", 5], ["2 Peter", 3],
+  ["1 John", 5], ["2 John", 1], ["3 John", 1], ["Jude", 1],
+  ["Revelation", 22]
+];
+
+// Flatten chapters
+let chapters = [];
+books.forEach(b => {
+  for (let c = 1; c <= b[1]; c++) {
+    chapters.push(`${b[0]} ${c}`);
+  }
+});
+
+// Starting point (December 1st Chapter)
+const startIndex = chapters.indexOf("Mark 4");
+
+// Helper: date difference in days
+function daysBetween(a, b) {
+  const ms = 24*60*60*1000;
+  const da = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const db = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.round((da - db) / ms);
+}
+
+// Get anchor
+function getAnchor() {
+  const today = new Date();
+  const dec1 = new Date(today.getFullYear(), 11, 1);
+  return today < dec1 ? new Date(today.getFullYear()-1, 11, 1) : dec1;
+}
+
+function getTodayChapter() {
+  const today = new Date();
+  const anchor = getAnchor();
+  const diff = daysBetween(today, anchor);
+  const index = (startIndex + diff) % chapters.length;
+  return chapters[(index + chapters.length) % chapters.length];
+}
+
+// Display
+const today = new Date();
+document.getElementById("date").textContent = today.toDateString();
+document.getElementById("chapter").textContent = getTodayChapter();
+</script>
+
+</body>
+</html>
