@@ -8,8 +8,6 @@
 <style>
   body {
     margin: 0;
-    background: #0d0d0d;
-    color: #ffffff;
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
@@ -18,32 +16,62 @@
     height: 100vh;
     text-align: center;
     padding: 20px;
+
+    /* Background image */
+    background: url('shark.png') no-repeat center center fixed;
+    background-size: cover;
+
+    /* Dark overlay so text is readable */
+    position: relative;
+    color: #ffffff;
+  }
+
+  /* Overlay to darken the image */
+  body::before {
+    content: '';
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: rgba(0,0,0,0.6);
+    z-index:0;
+  }
+
+  /* Make text appear above overlay */
+  #date, #chapter, #tomorrow, #tester {
+    position: relative;
+    z-index: 1;
   }
 
   #date {
-    font-size: 14px;
-    color: #999;
+    font-size: 1rem;
+    color: #ccc;
     margin-bottom: 10px;
   }
 
   #chapter {
-    font-size: 48px;
+    font-size: 4rem;
     font-weight: bold;
     margin-bottom: 10px;
   }
 
   #tomorrow {
-    font-size: 18px;
+    font-size: 1.5rem;
     color: #aaa;
+    margin-bottom: 10px;
   }
 
-  /* Mobile optimization */
+  /* Mobile scaling */
   @media (max-width: 600px) {
     #chapter {
-      font-size: 36px;
+      font-size: 2.5rem;
     }
     #tomorrow {
-      font-size: 16px;
+      font-size: 1.2rem;
+    }
+    #date {
+      font-size: 0.9rem;
     }
   }
 
@@ -52,10 +80,10 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background: #1a1a1a;
+    background: rgba(30,30,30,0.9);
     padding: 10px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0.9rem;
   }
 
   #tester input {
@@ -107,7 +135,6 @@ const books = [
   ["Revelation", 22]
 ];
 
-// Flatten to single list like ["Mark 1", "Mark 2", ...]
 let chapters = [];
 books.forEach(b => {
   for (let c = 1; c <= b[1]; c++) {
@@ -115,22 +142,18 @@ books.forEach(b => {
   }
 });
 
-// Starting point: Dec 1 → Mark 4
 const startIndex = chapters.indexOf("Mark 4");
 
-// Day difference helper
 function daysBetween(a, b) {
   const ms = 86400000;
   return Math.round((a - b) / ms);
 }
 
-// Finds the Dec 1 anchor for the current or test year
 function getAnchor(date) {
   const dec1 = new Date(date.getFullYear(), 11, 1);
   return date < dec1 ? new Date(date.getFullYear() - 1, 11, 1) : dec1;
 }
 
-// Get chapter for any date
 function getChapterFor(date) {
   const anchor = getAnchor(date);
   const diff = daysBetween(
@@ -141,29 +164,22 @@ function getChapterFor(date) {
   return chapters[(idx + chapters.length) % chapters.length];
 }
 
-// MAIN DISPLAY
 function display(date) {
   document.getElementById("date").textContent = date.toDateString();
+  document.getElementById("chapter").textContent = getChapterFor(date);
 
-  const todayChapter = getChapterFor(date);
-  document.getElementById("chapter").textContent = todayChapter;
-
-  // Tomorrow
   const tomorrow = new Date(date);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowChapter = getChapterFor(tomorrow);
   document.getElementById("tomorrow").textContent =
-    "Tomorrow: " + tomorrowChapter;
+    "Tomorrow: " + getChapterFor(tomorrow);
 }
 
-// Test date handler
 function applyTestDate() {
   const val = document.getElementById("testInput").value;
   if (!val) return;
   display(new Date(val));
 }
 
-// Default: show today
 display(new Date());
 </script>
 
