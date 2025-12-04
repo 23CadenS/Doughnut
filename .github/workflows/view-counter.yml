@@ -1,0 +1,24 @@
+name: Count Views
+on:
+  workflow_dispatch:
+  push:
+  schedule:
+    - cron: "*/5 * * * *"   # checks every 5 minutes for new hits
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Increment view count
+        run: |
+          echo "Views: $(( $(cat views.txt 2>/dev/null || echo 0) + 1 ))" > views.txt
+
+      - name: Commit changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "github-actions"
+          git add views.txt
+          git commit -m "update views" || echo "No changes"
+          git push
