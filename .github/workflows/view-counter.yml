@@ -1,24 +1,21 @@
-name: Count Views
+name: Update Views
+
 on:
   workflow_dispatch:
-  push:
-  schedule:
-    - cron: "*/5 * * * *"   # checks every 5 minutes for new hits
 
-permissions:
-  contents: write
-  
 jobs:
-  count:
+  update-views:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
       - name: Increment view counter
-  run: |
-    VIEWS=$(cat views.txt 2>/dev/null || echo 0)
-    VIEWS=$((VIEWS + 1))
-    echo "$VIEWS" > views.txt
+        run: |
+          VIEWS=$(cat views.txt 2>/dev/null || echo 0)
+          VIEWS=$((VIEWS + 1))
+          echo "$VIEWS" > views.txt
 
       - name: Commit changes
         run: |
