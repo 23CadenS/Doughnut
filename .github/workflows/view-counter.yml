@@ -14,9 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Increment view count
-        run: |
-          echo "Views: $(( $(cat views.txt 2>/dev/null || echo 0) + 1 ))" > views.txt
+      - name: Increment view counter
+  run: |
+    VIEWS=$(cat views.txt 2>/dev/null || echo 0)
+    VIEWS=$((VIEWS + 1))
+    echo "$VIEWS" > views.txt
 
       - name: Commit changes
         run: |
