@@ -17,7 +17,7 @@
     text-align: center;
     padding: 20px;
 
-     Background image 
+    /* Background image */
     background: url('shark.png') no-repeat center center fixed;
     background-size: cover;
 
@@ -39,7 +39,7 @@
   }
 
   /* Make text appear above overlay */
-  #date, #chapter, #tomorrow, #tester {
+  #date, #chapter, #tomorrow, #countdown, #tester {
     position: relative;
     z-index: 1;
   }
@@ -60,6 +60,14 @@
     font-size: 1.5rem;
     color: #aaa;
     margin-bottom: 10px;
+  }
+
+  #countdown {
+    font-size: 1.3rem;
+    color: #ffccff;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
   }
 
   /* Mobile scaling */
@@ -113,10 +121,10 @@
 <!--view tracker .png-->
 <img src="https://raw.githubusercontent.com/23CadenS/Doughnut/main/track.png" width="1" height="1" style="opacity:0; position:absolute;" />
 
-  
 <div id="date"></div>
 <div id="chapter"></div>
 <div id="tomorrow"></div>
+<div id="countdown"></div>
 
 <!-- Test-date box -->
 <div id="tester">
@@ -128,7 +136,8 @@
 <script>
 // Books from Mark → Revelation
 const books = [
-  ["Mark", 16], ["John", 21], ["1 Corinthians", 16], ["2 Corinthians", 13], ["1 Thessalonians", 5], ["2 Thessalonians", 3],
+  ["Mark", 16], ["John", 21], ["1 Corinthians", 16], ["2 Corinthians", 13],
+  ["1 Thessalonians", 5], ["2 Thessalonians", 3],
   ["1 Timothy", 6], ["2 Timothy", 4], ["Titus", 3], ["Philemon", 1],
   ["Hebrews", 13], ["1 Peter", 5], ["2 Peter", 3],
   ["1 John", 5], ["2 John", 1], ["3 John", 1], ["Jude", 1],
@@ -143,10 +152,11 @@ books.forEach(b => {
 });
 
 const startIndex = chapters.indexOf("Mark 4");
+const lastIndex = chapters.length - 1;
 
 function daysBetween(a, b) {
   const ms = 86400000;
-  return Math.round((a - b) / ms);
+  return Math.floor((a - b) / ms);
 }
 
 function getAnchor(date) {
@@ -154,24 +164,32 @@ function getAnchor(date) {
   return date < dec1 ? new Date(date.getFullYear() - 1, 11, 1) : dec1;
 }
 
-function getChapterFor(date) {
+function getIndexFor(date) {
   const anchor = getAnchor(date);
   const diff = daysBetween(
     new Date(date.getFullYear(), date.getMonth(), date.getDate()),
     anchor
   );
-  const idx = (startIndex + diff) % chapters.length;
-  return chapters[(idx + chapters.length) % chapters.length];
+  return (startIndex + diff) % chapters.length;
 }
 
 function display(date) {
   document.getElementById("date").textContent = date.toDateString();
-  document.getElementById("chapter").textContent = getChapterFor(date);
+
+  const todayIndex = getIndexFor(date);
+  document.getElementById("chapter").textContent = chapters[todayIndex];
 
   const tomorrow = new Date(date);
   tomorrow.setDate(tomorrow.getDate() + 1);
   document.getElementById("tomorrow").textContent =
-    "Tomorrow: " + getChapterFor(tomorrow);
+    "Tomorrow: " + chapters[getIndexFor(tomorrow)];
+
+  // Countdown
+  let daysLeft = lastIndex - todayIndex;
+  if (daysLeft < 0) daysLeft += chapters.length;
+
+  document.getElementById("countdown").textContent =
+    `${daysLeft} days till complete!!!`;
 }
 
 function applyTestDate() {
